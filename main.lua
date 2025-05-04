@@ -17,11 +17,6 @@ end
 
 ---@param file love.DroppedFile
 function love.filedropped(file)
-   if root:isImageShown() then
-      root:showBanner("Before updating an image, remove the current one.")
-      return
-   end
-
    file:open("r")
 
    local fileData = file:read("data")
@@ -29,7 +24,7 @@ function love.filedropped(file)
 
    if success then
       local image = love.graphics.newImage(imageData)
-      root:setImage(image)
+      root:insertImage(image)
    else
       root:showBanner(
          string.format("File isn't an image: %s", file:getFilename())

@@ -41,16 +41,16 @@ function M:new(config)
    return this
 end
 
-function M:update(dt)
+function M:mousepressed(x, y, b, istouch, presses)
    if
-      love.mouse.isDown(1)
-      and love.isMouseInside(self.x, self.y, self.width, self.height)
+      love.isMouseInside(self.x, self.y, self.width, self.height)
+      and self.action
    then
-      if self.action then
-         self.action()
-      end
+      self.action()
    end
 end
+
+function M:update(dt) end
 
 function M:draw()
    love.graphics.draw(

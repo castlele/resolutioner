@@ -1,12 +1,11 @@
 local banner = require("src.banner")
-local button = require("src.button")
 local resolutionList = require("src.resolutionlist")
+local imageEditor = require("src.imageeditor")
 
 ---@class RootView
----@field private backgroundImage love.Image?
 ---@field private wm WindowManager
 ---@field private font love.Font
----@field private closeButton Button
+---@field private editor ImageEditor
 ---@field private resolutions ResolutionList
 local M = {}
 
@@ -18,44 +17,27 @@ function M:load(wm)
 
    self.wm = wm
    self.font = love.graphics.newFont(font.path, font.size)
-   self.closeButton = button:new {
-      action = function()
-         if self.backgroundImage then
-            self.backgroundImage = nil
-         end
-      end,
-      x = self.wm:getWidth() - 32 - 16,
-      y = 16,
-      width = 32,
-      height = 32,
-      image = love.graphics.newImage(Config.res.images.close),
+   self.editor = imageEditor:new {
+      wm = wm,
    }
    self.resolutions =
       resolutionList:new(self.wm.resolutions, self.wm, 0, 0, 100, 20, self.font)
 end
 
 function M:update(dt)
-   self.closeButton:update(dt)
    self.resolutions:update(dt)
+   self.editor:update(dt)
    banner:update(dt)
 end
 
 function M:mousepressed(x, y, b, istouch, presses)
    self.resolutions:mousepressed(x, y, b)
-
-   if presses == 2 then
-      self.isFillScreen = not self.isFillScreen
-   end
+   self.editor:mousepressed(x, y, b, istouch, presses)
 end
 
----@return boolean
-function M:isImageShown()
-   return self.backgroundImage ~= nil
-end
-
----@param image love.Image?
-function M:setImage(image)
-   self.backgroundImage = image
+---@param image love.Image
+function M:insertImage(image)
+   self.editor:insertImage(image)
 end
 
 ---@param message string
@@ -64,7 +46,7 @@ function M:showBanner(message)
 end
 
 function M:draw()
-   if not self.backgroundImage then
+   if not self.editor:isAnyImages() then
       love.graphics.setFont(self.font)
 
       local textW = self.font:getWidth(dragAndDropText)
@@ -76,18 +58,7 @@ function M:draw()
          self:centerY() - textH / 2
       )
    else
-      if self.isFillScreen then
-         local sx = self.wm:getWidth() / self.backgroundImage:getWidth()
-         local sy = self.wm:getHeight() / self.backgroundImage:getHeight()
-
-         love.graphics.draw(self.backgroundImage, 0, 0, 0, sx, sy)
-      else
-         local x = self:centerX() - self.backgroundImage:getWidth() / 2
-         local y = self:centerY() - self.backgroundImage:getHeight() / 2
-
-         love.graphics.draw(self.backgroundImage, x, y)
-      end
-      self.closeButton:draw()
+      self.editor:draw()
    end
 
    self.resolutions:draw()
