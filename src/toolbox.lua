@@ -14,8 +14,15 @@ local Button = require("src.button")
 local M = {}
 
 local buttonSize = 32
+local buttonsKeys = {
+   "addScale",
+   "subtractScale",
+   "remove",
+}
 
 ---@class ActionsConfig
+---@field addScale fun()
+---@field subtractScale fun()
 ---@field remove fun()
 ---@param wm WindowManager
 ---@param actions ActionsConfig
@@ -32,18 +39,19 @@ function M:new(wm, actions)
    this.progress = 0
    this.presentingAnimationSpeed = 0.1
 
-   local buttonIndex = 0
+   for index, key in ipairs(buttonsKeys) do
+      local action = actions[key]
 
-   for actionName, action in pairs(actions) do
       local buttonConfig = {
          action = action,
          x = 0,
-         y = buttonIndex * buttonSize,
+         y = (index - 1) * buttonSize,
          width = buttonSize,
          height = buttonSize,
-         image = love.graphics.newImage(Config.res.images[actionName]),
+         image = love.graphics.newImage(Config.res.images[key]),
       }
       local button = Button:new(buttonConfig)
+
       table.insert(this.buttons, button)
    end
 

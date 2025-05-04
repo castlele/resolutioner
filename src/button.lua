@@ -53,6 +53,7 @@ end
 function M:update(dt) end
 
 function M:draw()
+   love.graphics.setColor(Config.colors.white)
    love.graphics.draw(
       self.image,
       self.x,

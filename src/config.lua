@@ -21,6 +21,8 @@ Config = {
          },
       },
       images = {
+         addScale = "res/images/addScale.png",
+         subtractScale = "res/images/subtractScale.png",
          remove = "res/images/remove.png",
       },
    },
