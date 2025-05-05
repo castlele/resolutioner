@@ -1,11 +1,12 @@
 ---@class ResolutionList
----@field resolutions table<string, {w: number, h: number}>
----@field wm WindowManager
----@field x number
----@field y number
----@field width number
----@field rowheight number
----@field font love.Font
+---@field isHidden boolean
+---@field private resolutions table<string, {w: number, h: number}>
+---@field private wm WindowManager
+---@field private x number
+---@field private y number
+---@field private width number
+---@field private rowheight number
+---@field private font love.Font
 local M = {}
 
 ---@param resolutions table<string, {w: number, h: number}>
@@ -25,6 +26,7 @@ function M:new(resolutions, wm, x, y, width, rowheight, font)
       width = width,
       rowheight = rowheight,
       font = font,
+      isHidden = false,
    }
 
    setmetatable(this, self)
@@ -35,9 +37,16 @@ function M:new(resolutions, wm, x, y, width, rowheight, font)
 end
 
 function M:update(dt)
+   if self.isHidden then
+      return
+   end
 end
 
 function M:mousepressed(x, y, button)
+   if self.isHidden then
+      return
+   end
+
    if button ~= 1 then
       return
    end
@@ -57,6 +66,10 @@ function M:mousepressed(x, y, button)
 end
 
 function M:draw()
+   if self.isHidden then
+      return
+   end
+
    local i = 0
    local w, h = self.wm:getWidth(), self.wm:getHeight()
 

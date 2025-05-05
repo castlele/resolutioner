@@ -1,5 +1,4 @@
 local toolbox = require("src.toolbox")
-local utils = require("src.utils")
 
 ---@class ImageInfo
 ---@field source love.Image
@@ -39,7 +38,10 @@ local infoViewConstants = {
 function M:new(args)
    local this = {}
 
-   local font = love.graphics.newFont(Config.res.fonts.default.path, Config.res.fonts.default.size)
+   local font = love.graphics.newFont(
+      Config.res.fonts.default.path,
+      Config.res.fonts.default.size
+   )
 
    this.images = {}
    this.wm = args.wm
@@ -55,6 +57,29 @@ function M:new(args)
       text = love.graphics.newText(font),
    }
    this.toolbox = toolbox:new(this.wm, {
+      layerUp = function()
+         if
+            this.selectedImageIndex
+            and this.selectedImageIndex < #this.images
+         then
+            local image = this.images[this.selectedImageIndex]
+            local nextImage = this.images[this.selectedImageIndex + 1]
+
+            this.images[this.selectedImageIndex] = nextImage
+            this.images[this.selectedImageIndex + 1] = image
+            this.selectedImageIndex = this.selectedImageIndex + 1
+         end
+      end,
+      layerDown = function()
+         if this.selectedImageIndex and this.selectedImageIndex > 1 then
+            local image = this.images[this.selectedImageIndex]
+            local prevImage = this.images[this.selectedImageIndex - 1]
+
+            this.images[this.selectedImageIndex] = prevImage
+            this.images[this.selectedImageIndex - 1] = image
+            this.selectedImageIndex = this.selectedImageIndex - 1
+         end
+      end,
       addScale = function()
          if this.selectedImageIndex then
             local image = this.images[this.selectedImageIndex]
@@ -100,15 +125,14 @@ function M:update(dt)
 end
 
 function M:mousepressed(x, y, b, istouch, presses)
-   self.toolbox:mousepressed(x, y, b, istouch, presses)
+   if self.toolbox:mousepressed(x, y, b, istouch, presses) then
+      return
+   end
 
-   for i, image in ipairs(utils.reversed(self.images)) do
-      if
-         x >= image.x
-         and x <= image.x + image.width
-         and y >= image.y
-         and y <= image.y + image.width
-      then
+   for i = #self.images, 1, -1 do
+      local image = self.images[i]
+
+      if love.isMouseInside(image.x, image.y, image.width, image.height) then
          if b == 1 then
             self.selectedImageIndex = i
          end
@@ -237,11 +261,7 @@ function M:drawImageInfo()
    )
 
    love.graphics.setColor(Config.colors.white)
-   love.graphics.draw(
-      self.imageInfo.text,
-      self.imageInfo.x,
-      self.imageInfo.y
-   )
+   love.graphics.draw(self.imageInfo.text, self.imageInfo.x, self.imageInfo.y)
 end
 
 return M

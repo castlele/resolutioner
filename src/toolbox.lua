@@ -15,12 +15,16 @@ local M = {}
 
 local buttonSize = 32
 local buttonsKeys = {
+   "layerUp",
+   "layerDown",
    "addScale",
    "subtractScale",
    "remove",
 }
 
 ---@class ActionsConfig
+---@field layerUp fun()
+---@field layerDown fun()
 ---@field addScale fun()
 ---@field subtractScale fun()
 ---@field remove fun()
@@ -95,10 +99,17 @@ function M:update(dt)
    end
 end
 
+---@return boolean
 function M:mousepressed(x, y, b, istouch, presses)
+   if not love.isMouseInside(self.x, self.y, self.width, self.height) then
+      return false
+   end
+
    for _, button in ipairs(self.buttons) do
       button:mousepressed(x, y, b, istouch, presses)
    end
+
+   return true
 end
 
 function M:show()

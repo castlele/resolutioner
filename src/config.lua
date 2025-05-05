@@ -21,6 +21,8 @@ Config = {
          },
       },
       images = {
+         layerUp = "res/images/layerUp.png",
+         layerDown = "res/images/layerDown.png",
          addScale = "res/images/addScale.png",
          subtractScale = "res/images/subtractScale.png",
          remove = "res/images/remove.png",
