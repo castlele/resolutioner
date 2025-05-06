@@ -22,6 +22,7 @@ function M:load(wm)
    }
    self.resolutions =
       resolutionList:new(self.wm.resolutions, self.wm, 0, 0, 100, 20, self.font)
+   self.resolutions.isHidden = true
 end
 
 function M:update(dt)
@@ -35,7 +36,7 @@ function M:mousepressed(x, y, b, istouch, presses)
    self.editor:mousepressed(x, y, b, istouch, presses)
 end
 
----@param image love.Image
+---@param image love.ImageData
 function M:insertImage(image)
    self.editor:insertImage(image)
 end

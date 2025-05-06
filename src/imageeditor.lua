@@ -1,13 +1,5 @@
 local toolbox = require("src.toolbox")
-
----@class ImageInfo
----@field source love.Image
----@field x number
----@field y number
----@field sx number
----@field sy number
----@field width number
----@field height number
+local imageView = require("src.imageview")
 
 ---@class ViewInfo
 ---@field x number
@@ -18,7 +10,7 @@ local toolbox = require("src.toolbox")
 ---@field text love.Text
 
 ---@class ImageEditor
----@field private images table<ImageInfo>
+---@field private images table<ImageView>
 ---@field private wm WindowManager
 ---@field private selectedImageIndex integer?
 ---@field private toolbox ToolboxView
@@ -57,6 +49,12 @@ function M:new(args)
       text = love.graphics.newText(font),
    }
    this.toolbox = toolbox:new(this.wm, {
+      -- frameSetup = function()
+      --    if this.selectedImageIndex then
+      --       local isFrameEditing = self.images[self.selectedImageIndex].isFrameEditing
+      --       self.images[self.selectedImageIndex].isFrameEditing = not isFrameEditing
+      --    end
+      -- end,
       layerUp = function()
          if
             this.selectedImageIndex
@@ -114,6 +112,10 @@ end
 function M:update(dt)
    self.toolbox:update(dt)
 
+   for _, image in ipairs(self.images) do
+      image:update(dt)
+   end
+
    if self.selectedImageIndex then
       self.toolbox:show()
       self:handleDrag()
@@ -134,6 +136,10 @@ function M:mousepressed(x, y, b, istouch, presses)
 
       if love.isMouseInside(image.x, image.y, image.width, image.height) then
          if b == 1 then
+            if self.selectedImageIndex == i then
+               image.isFrameEditing = not image.isFrameEditing
+            end
+
             self.selectedImageIndex = i
          end
 
@@ -146,10 +152,10 @@ function M:mousepressed(x, y, b, istouch, presses)
    end
 end
 
----@param image love.Image
+---@param image love.ImageData
 function M:insertImage(image)
-   ---@type ImageInfo
-   local info = {
+   ---@type ImageView
+   local info = imageView:new {
       source = image,
       x = 0,
       y = 0,
@@ -168,17 +174,33 @@ function M:isAnyImages()
 end
 
 function M:draw()
-   for _, image in ipairs(self.images) do
-      love.graphics.draw(image.source, image.x, image.y, 0, image.sx, image.sy)
+   for i, image in ipairs(self.images) do
+      image:draw(i == self.selectedImageIndex)
    end
 
    self:drawImageInfo()
-   self:drawSelection()
    self.toolbox:draw()
 end
 
 ---@private
+---@return boolean
+function M:isAnyImageFrameEditing()
+   for _, image in ipairs(self.images) do
+      if image.isFrameEditing then
+         return true
+      end
+   end
+
+   return false
+end
+
+---@private
 function M:handleDrag()
+   if self.images[self.selectedImageIndex].isFrameEditing then
+      self.draggingX, self.draggingY = nil, nil
+      return
+   end
+
    if not love.mouse.isDown(1) and self.selectedImageIndex then
       self.draggingX, self.draggingY = nil, nil
       return
@@ -223,27 +245,6 @@ function M:updateImageInfo()
    self.imageInfo.x = (self.wm:getWidth() - self.imageInfo.width) / 2
    self.imageInfo.y = self.wm:getHeight() - infoViewConstants.height
    self.imageInfo.isHidden = false
-end
-
----@private
-function M:drawSelection()
-   if not self.selectedImageIndex then
-      return
-   end
-
-   local image = self.images[self.selectedImageIndex]
-
-   love.graphics.setColor(Config.colors.accent)
-
-   love.graphics.setLineWidth(2)
-
-   love.graphics.rectangle(
-      "line",
-      image.x,
-      image.y,
-      image.width * image.sx,
-      image.height * image.sy
-   )
 end
 
 function M:drawImageInfo()

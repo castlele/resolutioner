@@ -23,8 +23,7 @@ function love.filedropped(file)
    local success, imageData = pcall(love.image.newImageData, fileData)
 
    if success then
-      local image = love.graphics.newImage(imageData)
-      root:insertImage(image)
+      root:insertImage(imageData)
    else
       root:showBanner(
          string.format("File isn't an image: %s", file:getFilename())
